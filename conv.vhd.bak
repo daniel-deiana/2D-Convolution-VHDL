@@ -46,7 +46,7 @@ architecture arch of conv is
         l2_for: for j in 0 to DIM_KER - 1 generate
 
             -- first
-            l1:if j = 0 and i = 0 generate
+            l0_if:if j = 0 and i = 0 generate
                buf0: shift_reg generic map (
                     N => 8,
                     M => 1
@@ -57,8 +57,7 @@ architecture arch of conv is
                     d => in_image,
                     q => propagate(i)
                 );
-            end generate;
-            l2:if j > 0 or i > 0 generate
+            else generate
             -- dffs 
                buf: shift_reg generic map (
                     N => 8,
@@ -69,12 +68,12 @@ architecture arch of conv is
                     reset => reset,
                     d => propagate(i*DIM_KER + j -1),
                     q => propagate(i*DIM_KER + j)
-                );
+                )
             end generate;
         end generate;
 
         -- buffer 
-        l3:if i < DIM_KER - 1 generate
+        l_if:if i < DIM_KER - 1 generate
            buf1: shift_reg generic map (
                 N => 8,
                 M => DIM_IMG - DIM_KER
