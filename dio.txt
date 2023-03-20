@@ -1,0 +1,25 @@
+    -- case M = 2
+    l1_if: if M = 2 generate
+    first: DFCE_N 
+                generic map (
+                    N => N
+                )
+                port map (
+                    clk => clk_s,
+                    en => '1',
+                    resetn => reset,
+                    di => d,
+                    do => int
+    );
+    second: DFCE_N 
+                generic map (
+                    N => N
+                )
+                port map (
+                    clk => clk_s,
+                    en => '1',
+                    resetn => reset,
+                    di => int,
+                    do => q
+    );
+    end generate;

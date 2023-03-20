@@ -19,8 +19,8 @@ end entity;
 
 architecture arch of conv is
 
-    type vec is array (0 to (DIM_KER*DIM_KER)-1) of std_logic_vector(7 downto 0);
-    signal propagate : vec := (others => (others => '0'));
+    type vec is array (0 to DIM_KER*DIM_KER) of std_logic_vector(7 downto 0);
+    signal propagate : vec ;
 
     component shift_reg
         generic(
@@ -32,8 +32,8 @@ architecture arch of conv is
         port (
             clk_s : in std_logic;
             reset: in std_logic; 
-            d: in std_logic_vector(7 downto 0);
-            q: out std_logic_vector(7 downto 0)
+            data_in: in std_logic_vector(7 downto 0);
+            data_out: out std_logic_vector(7 downto 0)
         );
     end component;
     
@@ -44,37 +44,38 @@ architecture arch of conv is
 
     l1_for:for i in 0 to DIM_KER - 1 generate
         l2_for: for j in 0 to DIM_KER - 1 generate
-
             -- first
             l1:if j = 0 and i = 0 generate
-               buf0: shift_reg generic map (
+               buf0: shift_reg 
+               generic map (
                     N => 8,
                     M => 1
                 )
                 port map(
                     clk_s => clk,
                     reset => reset,
-                    d => in_image,
-                    q => propagate(i)
+                    data_in => in_image,
+                    data_out => propagate(i*DIM_KER + j)
                 );
             end generate;
             l2:if j > 0 or i > 0 generate
             -- dffs 
-               buf: shift_reg generic map (
+               buf: shift_reg 
+               generic map (
                     N => 8,
                     M => 1
                 )
                 port map(
                     clk_s => clk,
                     reset => reset,
-                    d => propagate(i*DIM_KER + j -1),
-                    q => propagate(i*DIM_KER + j)
+                    data_in => propagate(i*DIM_KER+j-1),
+                    data_out => propagate(i*DIM_KER+j)
                 );
             end generate;
         end generate;
 
         -- buffer 
-        l3:if i < DIM_KER - 1 generate
+        l3:if i <  DIM_KER - 1 generate
            buf1: shift_reg generic map (
                 N => 8,
                 M => DIM_IMG - DIM_KER
@@ -82,10 +83,10 @@ architecture arch of conv is
             port map(
                 clk_s => clk,
                 reset => reset,
-                d => propagate(i*DIM_KER + DIM_KER - 1),
-                q => propagate(i*DIM_KER + DIM_KER)
+                data_in => propagate(i*DIM_KER + DIM_KER - 1),
+                data_out => propagate(i*DIM_KER + DIM_KER)
             );
         end generate;
-    
         end generate; 
+        out_conv <= propagate(DIM_KER*DIM_KER);
 end architecture;
