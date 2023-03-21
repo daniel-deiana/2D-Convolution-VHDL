@@ -20,18 +20,18 @@ end entity;
 architecture arch of conv is
 
     type vec is array (0 to DIM_KER*DIM_KER) of std_logic_vector(7 downto 0);
-    signal propagate : vec ;
+    signal path : vec ;
 
-    component shift_reg
+    component fifo
         generic(
             -- dimennsion of dffs
-            N : positive;
+            DEPTH : positive;
             -- dimension of fibo buffer 
-            M : positive
+            DATA_WIDTH : positive
         );
         port (
-            clk_s : in std_logic;
-            reset: in std_logic; 
+            clk : in std_logic;
+            a_rst_n: in std_logic;
             data_in: in std_logic_vector(7 downto 0);
             data_out: out std_logic_vector(7 downto 0)
         );
@@ -42,51 +42,58 @@ architecture arch of conv is
     -- we use only fifo buffers
     -- a dff is a fifo buffer with M=1
 
-    l1_for:for i in 0 to DIM_KER - 1 generate
-        l2_for: for j in 0 to DIM_KER - 1 generate
-            -- first
-            l1:if j = 0 and i = 0 generate
-               buf0: shift_reg 
-               generic map (
-                    N => 8,
-                    M => 1
-                )
-                port map(
-                    clk_s => clk,
-                    reset => reset,
-                    data_in => in_image,
-                    data_out => propagate(i*DIM_KER + j)
-                );
-            end generate;
-            l2:if j > 0 or i > 0 generate
-            -- dffs 
-               buf: shift_reg 
-               generic map (
-                    N => 8,
-                    M => 1
-                )
-                port map(
-                    clk_s => clk,
-                    reset => reset,
-                    data_in => propagate(i*DIM_KER+j-1),
-                    data_out => propagate(i*DIM_KER+j)
-                );
-            end generate;
+    l1_for:for i in 0 to (DIM_KER-1)*(DIM_KER+1) generate
+
+        l1_if: if i = 0 generate
+        dff0: fifo generic map(
+            DEPTH => 1,
+            DATA_WIDTH => 8
+        )
+        port map(
+            clk => clk,
+            a_rst_n => reset,
+            data_in => in_image,
+            data_out => path(i)
+        );
         end generate;
 
-        -- buffer 
-        l3:if i <  DIM_KER - 1 generate
-           buf1: shift_reg generic map (
-                N => 8,
-                M => DIM_IMG - DIM_KER
-            )
-            port map(
-                clk_s => clk,
-                reset => reset,
-                data_in => propagate(i*DIM_KER + DIM_KER - 1),
-                data_out => propagate(i*DIM_KER + DIM_KER)
-            );
+        l2_if: if i > 0 and i mod DIM_KER /= 0 generate
+        dff0: fifo generic map(
+            DEPTH => 1,
+            DATA_WIDTH => 8
+        )
+        port map(
+            clk => clk,
+            a_rst_n => reset,
+            data_in => path(i-1),
+            data_out => path(i)
+        );
         end generate;
-        end generate; 
-        out_conv <= propagate(DIM_KER*DIM_KER);
+
+        l3_if: if i > 0 and i mod DIM_KER = 0 generate
+        dff0: fifo generic map(
+            DEPTH => DIM_IMG - DIM_KER ,
+            DATA_WIDTH => 8
+        )
+        port map(
+            clk => clk,
+            a_rst_n => reset,
+            data_in => path(i-1),
+            data_out => path(i)
+        );
+        end generate;
+    end generate;
+
+    l2_for:for i in (DIM_KER-1)*(DIM_KER+1) + 1 to (DIM_KER-1)*(DIM_KER+1) + DIM_KER - 1 generate
+        dfflast: fifo generic map(
+            DEPTH => 1,
+            DATA_WIDTH => 8
+        )
+        port map(
+            clk => clk,
+            a_rst_n => reset,
+            data_in => path(i-1),
+            data_out => path(i)
+        );
+    end generate;
 end architecture;
