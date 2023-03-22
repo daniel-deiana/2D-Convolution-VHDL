@@ -1,20 +1,11 @@
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.numeric_std.all;
-
---------------------------------------------------------------------
--- Package (used for declaration of array of std_logic_vector)
---------------------------------------------------------------------
-
-package pkg is
-  type array_t is array (natural range <>) of std_logic_vector(7 downto 0);
-end package;
-
-package body pkg is
-end package body;
+library ieee;
+    use ieee.std_logic_1164.all;
+    use ieee.numeric_std.all;
+    use ieee.math_real.all;
 
 library work;
-use work.pkg.all;
+    use work.utilities.all;
+
 
 --------------------------------------------------------------------
 -- Interface Declaration
@@ -30,18 +21,16 @@ entity conv is
         reset: in std_logic;
         in_image: in std_logic_vector(7 downto 0);
         in_kernel: in std_logic_vector(7 downto 0);
-        out_conv: out array_t(0 to DIM_KER*DIM_KER-1 )
+        out_conv: out arr(DIM_KER*DIM_KER-1 downto 0)
     );
 end entity;
-
 
 --------------------------------------------------------------------
 -- Architecture declaration
 --------------------------------------------------------------------
 architecture arch of conv is
 
-    type vec is array (0 to DIM_KER*DIM_KER) of std_logic_vector(7 downto 0);
-    signal path : vec ;
+    signal path : arr(DIM_KER*DIM_KER downto 0 ) ;
 
     component fifo
         generic(
@@ -67,7 +56,6 @@ architecture arch of conv is
 
     l1_for:for i in 0 to (DIM_KER-1)*(DIM_KER+1) generate
 
-
     --------------------------------------------------------------------
     -- Start of the pipeline 
     --------------------------------------------------------------------
@@ -89,7 +77,7 @@ architecture arch of conv is
     -- Internal components of the pipeline, when i%DIM_KER != 0 we use 
     -- a fifo with DEPTH = 1 (to declare a DFF) 
     --------------------------------------------------------------------    
-        l2_if: if i > 0 and i mod DIM_KER /= 0 generate
+        l2_if: if i > 0 and i + 1 mod DIM_KER + 1 /= 0 generate
         dff0: fifo generic map(
             DEPTH => 1,
             DATA_WIDTH => 8
@@ -107,9 +95,9 @@ architecture arch of conv is
     -- a fifo with DEPTH = DIM_IMG - DIM_KER (to declare a fifo buffer 
     -- used to store matrix values that in a cycle we dont use for computations) 
     --------------------------------------------------------------------
-
         l3_if: if i > 0 and i mod DIM_KER = 0 generate
-        dff0: fifo generic map(
+        dff0: fifo 
+        generic map(
             DEPTH => DIM_IMG - DIM_KER ,
             DATA_WIDTH => 8
         )
@@ -125,7 +113,6 @@ architecture arch of conv is
     --------------------------------------------------------------------
     -- Last level of the pipeline, we don't need a fifo buffer at the end 
     --------------------------------------------------------------------
-
     l2_for:for i in (DIM_KER-1)*(DIM_KER+1) + 1 to (DIM_KER-1)*(DIM_KER+1) + DIM_KER - 1  generate
         dfflast: fifo generic map(
             DEPTH => 1,
@@ -137,5 +124,16 @@ architecture arch of conv is
             data_in => path(i-1),
             data_out => path(i)
         );
+
+    assignments: process(path)
+    begin
+    if (DIM_KER=2) then
+        out_conv(0) <= path(4);
+        out_conv(1) <= path(3);
+        out_conv(2) <= path(1);
+        out_conv(3) <= path(0);
+    end if;
+    end process; 
+
     end generate;
 end architecture;

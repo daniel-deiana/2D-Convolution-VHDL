@@ -1,0 +1,31 @@
+
+    assignments: process(path)
+    variable index : integer := 0;
+    variable k : integer := 0;
+    begin
+        for i in 0 to DIM_KER * DIM_KER - 1 loop
+            index := (DIM_KER-1)*(DIM_KER+1) + DIM_KER - 1 - i;
+            if index >= (DIM_KER-1)*(DIM_KER+1) then
+                out_conv(k) <= path(index);
+                k := k + 1;
+            elsif (index mod DIM_KER /= 0) then
+                out_conv(k) <= path(index);
+                K := k + 1;
+            end if;
+        end loop;
+    end process; 
+
+
+    variable i : integer := 0; 
+    variable k : integer := 0;
+    variable idx : integer := 0;
+    begin
+        while (i <= DIM_KER*DIM_KER-1) loop
+            idx := (DIM_KER-1)*(DIM_KER+1) + DIM_KER - 1 - k;
+            if (idx >= (DIM_KER-1)*(DIM_KER+1) or idx mod DIM_KER /= 0 or idx = 0) then
+                out_conv(i) <= path(idx);
+                i := i + 1;
+            end if;
+            k := k + 1; 
+        end loop;
+    end process; 

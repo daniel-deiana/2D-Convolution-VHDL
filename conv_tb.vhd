@@ -1,7 +1,10 @@
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.numeric_std.all;
-use ieee.std_logic_unsigned.all;
+library ieee;
+    use ieee.std_logic_1164.all;
+    use ieee.numeric_std.all;
+    use ieee.math_real.all;
+
+library work;
+    use work.utilities.all;
 
 
 entity conv_tb is
@@ -24,7 +27,7 @@ entity conv_tb is
                 reset: in std_logic; 
                 in_image: in std_logic_vector(7 downto 0);
                 in_kernel: in std_logic_vector(7 downto 0);
-                out_conv: out std_logic_vector(7 downto 0)
+                out_conv: out arr(M_kernel*M_kernel-1 downto 0)
             );
         end component;    
     
@@ -32,7 +35,7 @@ entity conv_tb is
         signal reset_ext : std_logic := '0';
         signal image_ext :  std_logic_vector(7 downto 0) := std_logic_vector(to_unsigned(0,8));
         signal kernel_ext :  std_logic_vector(7 downto 0);
-        signal out_ext :  std_logic_vector(7 downto 0);
+        signal out_ext : arr(M_kernel*M_kernel - 1 downto 0);
         signal end_sim : std_logic := '1'; 
 
         begin 
@@ -68,8 +71,16 @@ entity conv_tb is
                     when 35 => image_ext   <= std_logic_vector(to_unsigned(6,8));
                     when 36 => image_ext   <= std_logic_vector(to_unsigned(7,8));
                     when 37 => image_ext   <= std_logic_vector(to_unsigned(8,8));
+                    when 38 => image_ext   <= std_logic_vector(to_unsigned(9,8));
+                    when 39 => image_ext   <= std_logic_vector(to_unsigned(10,8));
+                    when 40 => image_ext   <= std_logic_vector(to_unsigned(11,8));
+                    when 41 => image_ext   <= std_logic_vector(to_unsigned(12,8));
+                    when 42 => image_ext   <= std_logic_vector(to_unsigned(13,8));
+                    when 43 => image_ext   <= std_logic_vector(to_unsigned(14,8));
+                    when 44 => image_ext   <= std_logic_vector(to_unsigned(15,8));
+                    when 45 => image_ext   <= std_logic_vector(to_unsigned(16,8));
 
-                    when 40 => end_sim <= '0';  -- This command stops the simulation when t = 10
+                    when 50 => end_sim <= '0';  -- This command stops the simulation when t = 10
                     when others => null;        -- Specifying that nothing happens in the other cases
                 end case;
             t := t + 1;  -- the variable is updated exactly here (try to move this statement before the "case(t) is" one and watch the difference in the simulation)
