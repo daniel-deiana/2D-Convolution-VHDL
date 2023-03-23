@@ -11,7 +11,7 @@ library work;
 -- Interface Declaration
 --------------------------------------------------------------------
 
-entity conv is 
+entity pipeline is 
     generic(
         DIM_IMG : positive := 3;
         DIM_KER : positive := 2
@@ -29,8 +29,7 @@ end entity;
 -- Architecture declaration
 --------------------------------------------------------------------
 architecture arch of conv is
-
-    signal path : arr(DIM_KER*DIM_KER downto 0 ) ;
+    signal path : arr(DIM_KER*DIM_KER downto 0 );
 
     component fifo
         generic(
@@ -48,7 +47,6 @@ architecture arch of conv is
     end component;
     
     begin
-
     --------------------------------------------------------------------
     -- We use for generate to build up the pipeline, using fifo buffers
     -- DFFs are fifo with DEPTH = 1
@@ -77,7 +75,7 @@ architecture arch of conv is
     -- Internal components of the pipeline, when i%DIM_KER != 0 we use 
     -- a fifo with DEPTH = 1 (to declare a DFF) 
     --------------------------------------------------------------------    
-        l2_if: if i > 0 and i + 1 mod DIM_KER + 1 /= 0 generate
+        l2_if: if i > 0 and (i+1) mod (DIM_KER + 1) /= 0 generate
         dff0: fifo generic map(
             DEPTH => 1,
             DATA_WIDTH => 8
@@ -95,7 +93,7 @@ architecture arch of conv is
     -- a fifo with DEPTH = DIM_IMG - DIM_KER (to declare a fifo buffer 
     -- used to store matrix values that in a cycle we dont use for computations) 
     --------------------------------------------------------------------
-        l3_if: if i > 0 and i mod DIM_KER = 0 generate
+        l3_if: if i > 0 and (i+1) mod (DIM_KER+1) = 0 generate
         dff0: fifo 
         generic map(
             DEPTH => DIM_IMG - DIM_KER ,
@@ -132,8 +130,12 @@ architecture arch of conv is
         out_conv(1) <= path(3);
         out_conv(2) <= path(1);
         out_conv(3) <= path(0);
+    elsif(DIM_KER=3) then
     end if;
     end process; 
+
+    
+
 
     end generate;
 end architecture;

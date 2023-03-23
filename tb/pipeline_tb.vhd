@@ -17,7 +17,7 @@ entity conv_tb is
         constant N_image : positive := 4;
         constant M_kernel : positive := 2;
     
-        component conv 
+        component pipeline 
             generic (
                 DIM_IMG : positive;
                 DIM_KER : positive
@@ -42,7 +42,7 @@ entity conv_tb is
             clk_ext <= (not clk_ext and end_sim) after clk_period/2;
             reset_ext <= '1' after T_RESET; 
 
-            DUT: conv 
+            DUT: pipeline
                 generic map (
                     DIM_IMG => N_image,
                     DIM_KER => M_kernel
