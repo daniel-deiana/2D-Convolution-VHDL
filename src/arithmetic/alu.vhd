@@ -15,7 +15,7 @@ library work;
     use work.common_pkg.all;
 
 
-entity alu is
+entity alu is 
     generic (
         K      : positive
     );

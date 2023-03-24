@@ -20,7 +20,6 @@ entity pipeline is
         clk: in std_logic;
         reset: in std_logic;
         in_image: in std_logic_vector(7 downto 0);
-        in_kernel: in std_logic_vector(7 downto 0);
         out_conv: out arr(DIM_KER*DIM_KER-1 downto 0)
     );
 end entity;
@@ -28,7 +27,7 @@ end entity;
 --------------------------------------------------------------------
 -- Architecture declaration
 --------------------------------------------------------------------
-architecture arch of conv is
+architecture arch of pipeline is
     signal path : arr(DIM_KER*DIM_KER downto 0 );
 
     component fifo
