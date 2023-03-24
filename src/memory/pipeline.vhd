@@ -5,6 +5,7 @@ library ieee;
 
 library work;
     use work.utilities.all;
+    use work.common_pkg.all;
 
 
 --------------------------------------------------------------------
@@ -20,7 +21,7 @@ entity pipeline is
         clk: in std_logic;
         reset: in std_logic;
         in_image: in std_logic_vector(7 downto 0);
-        out_conv: out arr(DIM_KER*DIM_KER-1 downto 0)
+        out_conv: out VECTOR(DIM_KER*DIM_KER-1 downto 0)
     );
 end entity;
 
@@ -28,7 +29,7 @@ end entity;
 -- Architecture declaration
 --------------------------------------------------------------------
 architecture arch of pipeline is
-    signal path : arr(DIM_KER*DIM_KER downto 0 );
+    signal path : VECTOR(DIM_KER*DIM_KER downto 0 );
 
     component fifo
         generic(
