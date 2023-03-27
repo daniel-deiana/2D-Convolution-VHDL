@@ -38,7 +38,6 @@ end entity;
 architecture conv of convolution is
 
     signal data_out_pipeline : VECTOR(DIM_KER*DIM_KER-1 downto 0);
-    signal to_alu : VECTOR(2*DIM_KER*DIM_KER - 1 downto 0);
 
     component pipeline is 
     generic (
@@ -69,7 +68,6 @@ architecture conv of convolution is
     --------------------------------------------------------------------
     -- Pipeline unit istantiation
     --------------------------------------------------------------------
-
     pipeline0: pipeline
     generic map(
         DIM_IMG => DIM_IMG,
@@ -84,9 +82,6 @@ architecture conv of convolution is
     --------------------------------------------------------------------
     -- Alu unit istantiation
     --------------------------------------------------------------------
-
-
-
     alu0: alu 
     generic map(
         K => DIM_KER
