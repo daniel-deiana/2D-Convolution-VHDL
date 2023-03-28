@@ -63,6 +63,7 @@ architecture conv of convolution is
     port (
         clk: in std_logic;
         reset: in std_logic;
+        stall: in std_logic;
         in_image: in std_logic_vector(7 downto 0);
         out_conv: out VECTOR(DIM_KER*DIM_KER-1 downto 0)
     );
@@ -81,6 +82,18 @@ architecture conv of convolution is
 
     begin
 
+
+
+    --------------------------------------------------------------------
+    -- Kernel buffer istantiation
+    --------------------------------------------------------------------
+    kernelbuf: fifo 
+    generic map(
+        DIM_
+    )
+    port map (
+
+    );
     --------------------------------------------------------------------
     -- State Machine istantiation
     --------------------------------------------------------------------
@@ -108,6 +121,7 @@ architecture conv of convolution is
     port map(
         clk => clk,
         reset => reset,
+        stall => stall_sig,
         in_image => x,
         out_conv => data_out_pipeline
     );

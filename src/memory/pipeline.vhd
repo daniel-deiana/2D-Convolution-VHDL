@@ -20,6 +20,7 @@ entity pipeline is
     port (
         clk: in std_logic;
         reset: in std_logic;
+        stall: in std_logic;
         in_image: in std_logic_vector(7 downto 0);
         out_conv: out VECTOR(DIM_KER*DIM_KER-1 downto 0)
     );
@@ -41,6 +42,7 @@ architecture arch of pipeline is
         port (
             clk : in std_logic;
             a_rst_n: in std_logic;
+            enable : in std_logic;
             data_in: in std_logic_vector(7 downto 0);
             data_out: out std_logic_vector(7 downto 0)
         );
@@ -66,6 +68,7 @@ architecture arch of pipeline is
         port map(
             clk => clk,
             a_rst_n => reset,
+            enable => stall,
             data_in => in_image,
             data_out => path(i)
         );
@@ -83,6 +86,7 @@ architecture arch of pipeline is
         port map(
             clk => clk,
             a_rst_n => reset,
+            enable => stall,
             data_in => path(i-1),
             data_out => path(i)
         );
@@ -102,6 +106,7 @@ architecture arch of pipeline is
         port map(
             clk => clk,
             a_rst_n => reset,
+            enable => stall, 
             data_in => path(i-1),
             data_out => path(i)
         );
@@ -119,6 +124,7 @@ architecture arch of pipeline is
         port map(
             clk => clk,
             a_rst_n => reset,
+            enable => stall,
             data_in => path(i-1),
             data_out => path(i)
         );

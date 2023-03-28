@@ -57,7 +57,7 @@ end process p_state;
 -- Current state logic
 ----------------------------------------------------------------- 
 
-p_comb : process(r_st_present, i_f , x_valid)
+p_comb : process(clk, r_st_present, i_f , x_valid)
 begin
   case r_st_present is
     
@@ -71,7 +71,7 @@ begin
     
     -- S1
     when ST_S1 => 
-      if counter_kernel > std_logic_vector(to_unsigned(DIM_KER*DIM_KER,8)) then  
+      if counter_kernel > std_logic_vector(to_unsigned(DIM_KER*DIM_KER-1,8)) then  
         w_st_next  <= ST_S2;
       else                                                         
         w_st_next  <= ST_S1;
@@ -79,7 +79,7 @@ begin
     
     -- S2
     when ST_S2 =>  
-        if counter_img = std_logic_vector(to_unsigned((DIM_KER-1)*DIM_IMG + DIM_KER,8)) then
+        if counter_img = std_logic_vector(to_unsigned((DIM_KER-1)*DIM_IMG + DIM_KER-1 ,8)) then
             w_st_next <= ST_S3;
         else
             w_st_next <= ST_S2;
@@ -87,7 +87,7 @@ begin
     
     -- S3
     when ST_S3 =>  
-        if counter_out = std_logic_vector(to_unsigned(4,8)) then
+        if counter_out = std_logic_vector(to_unsigned((DIM_IMG-DIM_KER+1)*(DIM_IMG-DIM_KER+1),8)) then
             w_st_next <= ST_S0;
         else
             w_st_next <= ST_S3;
@@ -95,8 +95,6 @@ begin
     
   end case;
 end process p_comb;
-
-
 
 p_state_out : process(clk,reset)
 begin

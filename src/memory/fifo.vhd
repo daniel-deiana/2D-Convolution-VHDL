@@ -9,6 +9,7 @@ entity fifo is
   port(
     clk      : in std_logic;
     a_rst_n  : in std_logic;
+    enable   : in std_logic; 
     data_in  : in std_logic_vector(DATA_WIDTH - 1 downto 0);
     data_out : out std_logic_vector(DATA_WIDTH - 1 downto 0)
   );
@@ -45,7 +46,7 @@ begin
         port map (
           clk     => clk,
           a_rst_n => a_rst_n,
-          en      => '1',
+          en      => enable,
           d       => data_in,
           q       => int_fifo(i)
         );
@@ -57,7 +58,7 @@ begin
         port map (
           clk     => clk,
           a_rst_n => a_rst_n,
-          en      => '1',
+          en      => enable,
           d       => int_fifo(i-1),
           q       => int_fifo(i)
         );

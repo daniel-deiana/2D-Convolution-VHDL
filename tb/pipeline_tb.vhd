@@ -24,7 +24,8 @@ entity pipeline_tb  is
             );
             port (
                 clk : in std_logic;
-                reset: in std_logic; 
+                reset: in std_logic;
+                stall: in std_logic; 
                 in_image: in std_logic_vector(7 downto 0);
                 in_kernel: in std_logic_vector(7 downto 0);
                 out_conv: out arr(M_kernel*M_kernel-1 downto 0)
@@ -36,6 +37,7 @@ entity pipeline_tb  is
         signal image_ext :  std_logic_vector(7 downto 0) := std_logic_vector(to_unsigned(0,8));
         signal kernel_ext :  std_logic_vector(7 downto 0);
         signal out_ext : arr(M_kernel*M_kernel - 1 downto 0);
+        signal stall_ext : std_logic := '1';
         signal end_sim : std_logic := '1'; 
 
         begin 
@@ -50,6 +52,7 @@ entity pipeline_tb  is
                 port map (
                     clk => clk_ext,
                     reset => reset_ext,
+                    stall => stall_ext,
                     in_image => image_ext,
                     in_kernel => kernel_ext,
                     out_conv => out_ext
