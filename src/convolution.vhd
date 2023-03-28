@@ -27,7 +27,6 @@ entity convolution is
         y_valid : out std_logic;
         y : out std_Logic_vector(N_BIT - 1 downto 0);
         data_out_kernel : in VECTOR(DIM_KER*DIM_KER -1 downto 0)
-
     );
 end entity;
 
@@ -38,7 +37,8 @@ end entity;
 architecture conv of convolution is
 
     signal data_out_pipeline : VECTOR(DIM_KER*DIM_KER-1 downto 0);
-    signal stall_sig : std_logic;
+    signal stall_p_sig : std_logic;
+    signal stall_k_sig : std_logic;
 
 
 
@@ -53,7 +53,8 @@ architecture conv of convolution is
         i_f : in std_logic;
         x_valid : in std_logic;
         y_valid : out std_logic;
-        stall : out std_logic
+        stall_p : out std_logic;
+        stall_k : out std_logic
     );
     end component;
 
@@ -87,14 +88,8 @@ architecture conv of convolution is
     --------------------------------------------------------------------
     -- Kernel buffer istantiation
     --------------------------------------------------------------------
-    kernelbuf: fifo 
-    generic map(
-        DIM_KER : positive;
-        dim
-    )
-    port map (
+    
 
-    );
     --------------------------------------------------------------------
     -- State Machine istantiation
     --------------------------------------------------------------------
@@ -109,7 +104,8 @@ architecture conv of convolution is
         i_f => if_signal,
         x_valid => x_valid,
         y_valid => y_valid,
-        stall => stall_sig
+        stall_p => stall_p_sig,
+        stall_k => stall_k_sig
     );
     --------------------------------------------------------------------
     -- Pipeline unit istantiation
@@ -122,7 +118,7 @@ architecture conv of convolution is
     port map(
         clk => clk,
         reset => reset,
-        stall => stall_sig,
+        stall => stall_p_sig,
         in_image => x,
         out_conv => data_out_pipeline
     );

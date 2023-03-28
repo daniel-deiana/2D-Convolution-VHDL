@@ -20,7 +20,8 @@ entity state_machine is
         x_valid : in std_logic;
         -- output 
         y_valid : out std_logic;
-        stall : out std_logic
+        stall_p : out std_logic;
+        stall_k : out std_logic
   );
 end state_machine;
 
@@ -57,27 +58,31 @@ end process p_state;
 -- Current state logic
 ----------------------------------------------------------------- 
 
-p_comb : process(clk, r_st_present, i_f , x_valid)
+p_comb : process(clk, reset, r_st_present, i_f , x_valid)
 begin
   case r_st_present is
     -- S0
     when ST_S0 => 
       if (i_f = '0') and (x_valid = '1') then  
         w_st_next  <= ST_S1;
-      else                                                         
+        else                                                         
         w_st_next  <= ST_S0;
       end if;
     -- S1
     when ST_S1 => 
       if counter_kernel > std_logic_vector(to_unsigned(DIM_KER*DIM_KER-1,8)) then  
         w_st_next  <= ST_S2;
-      else                                                         
-        w_st_next  <= ST_S1;
+      elsif reset = '0' then                                                      
+        w_st_next  <= ST_S0;
+      else
+        w_st_next <= ST_S1;
       end if;
     -- S2
     when ST_S2 =>  
         if counter_img = std_logic_vector(to_unsigned((DIM_KER-1)*DIM_IMG + DIM_KER-1 ,8)) then
             w_st_next <= ST_S3;
+        elsif reset = '0' then                                                      
+            w_st_next  <= ST_S0;
         else
             w_st_next <= ST_S2;
         end if;    
@@ -85,6 +90,8 @@ begin
     when ST_S3 =>  
         if counter_out = std_logic_vector(to_unsigned((DIM_IMG-DIM_KER+1)*(DIM_IMG-DIM_KER+1),8)) then
             w_st_next <= ST_S0;
+        elsif reset = '0' then                                                      
+            w_st_next  <= ST_S0;
         else
             w_st_next <= ST_S3;
         end if;  
@@ -95,13 +102,16 @@ p_state_out : process(clk,reset)
 begin
   if(reset='0') then
     y_valid     <= '0';
-    stall       <= '1';
+    stall_p       <= '1';
+    stall_k       <= '1';
+  
   
   elsif(rising_edge(clk)) then
     case r_st_present is
     
     when ST_S0 =>
-        stall     <= '1';
+        stall_p     <= '1';
+        stall_k   <= '1'; 
         y_valid   <= '0';
         counter_kernel <= std_logic_vector(to_unsigned(0,8));
         counter_img <= std_logic_vector(to_unsigned(0,8));
@@ -109,11 +119,16 @@ begin
     
     when ST_S1 =>
         counter_kernel <= counter_kernel + 1;
+        stall_k <= '0';
     
     when ST_S2 => 
+        stall_k <= '1';
+        stall_p <= '0';
+        y_valid <= '0';
         counter_img <= counter_img + 1;
 
     when ST_S3 => 
+        y_valid <= '1';
         counter_out <= counter_out + 1;
 
     end case;

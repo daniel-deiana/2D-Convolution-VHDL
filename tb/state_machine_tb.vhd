@@ -29,7 +29,8 @@ architecture beh of  fsm_tb is
                 x_valid : in std_logic;
                 -- output 
                 y_valid : out std_logic;
-                stall : out std_logic
+                stall_p : out std_logic;
+                stall_k : out std_logic
             );
         end component;    
     
@@ -37,7 +38,8 @@ architecture beh of  fsm_tb is
         signal reset_ext : std_logic := '0';
         signal end_sim : std_logic := '1'; 
         signal i_f_ext : std_logic := '1';
-        signal stall_ext : std_logic := '1';
+        signal stall_p_ext : std_logic := '1';
+        signal stall_k_ext : std_logic := '1';
         signal y_valid_ext : std_logic := '0';
         signal x_valid_ext : std_logic := '0'; 
 
@@ -56,7 +58,8 @@ architecture beh of  fsm_tb is
                     i_f => i_f_ext,
                     x_valid => x_valid_ext,
                     y_valid => y_valid_ext,
-                    stall => stall_ext 
+                    stall_p => stall_p_ext,
+                    stall_k => stall_k_ext 
                 );
 
         STIMULI: process(clk_ext, reset_ext)  -- process used to make the testbench signals change synchronously with the rising edge of the clock
