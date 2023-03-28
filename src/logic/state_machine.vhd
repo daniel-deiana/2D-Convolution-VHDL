@@ -24,7 +24,7 @@ entity state_machine is
   );
 end state_machine;
 
-architecture rtl of control_logic is
+architecture rtl of state_machine is
 type t_control_logic_fsm is (
                           ST_S0      ,
                           ST_S1      ,
@@ -71,7 +71,7 @@ begin
     
     -- S1
     when ST_S1 => 
-      if counter_kernel = std_logic_vector(to_unsigned(DIM_KER*DIM_KER,8)) then  
+      if counter_kernel > std_logic_vector(to_unsigned(DIM_KER*DIM_KER,8)) then  
         w_st_next  <= ST_S2;
       else                                                         
         w_st_next  <= ST_S1;

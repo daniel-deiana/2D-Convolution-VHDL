@@ -6,11 +6,11 @@ library ieee;
 library work;
     use work.utilities.all;
 
+entity fsm_tb is
+end entity;
 
-entity pipeline_tb  is
-    end entity;
     
-    architecture beh of pipeline_tb is 
+architecture beh of  fsm_tb is 
     
         constant T_RESET : time := 25 ns;
         constant clk_period : time := 10 ns;
@@ -36,22 +36,26 @@ entity pipeline_tb  is
         signal clk_ext : std_logic := '0';
         signal reset_ext : std_logic := '0';
         signal end_sim : std_logic := '1'; 
+        signal i_f_ext : std_logic := '1';
+        signal stall_ext : std_logic := '1';
+        signal y_valid_ext : std_logic := '0';
+        signal x_valid_ext : std_logic := '0'; 
 
         begin 
             clk_ext <= (not clk_ext and end_sim) after clk_period/2;
             reset_ext <= '1' after T_RESET; 
 
-            DUT: pipeline
+            DUT: state_machine
                 generic map (
-                    DIM_KER => N_kernel,
-                    DIM_IMG => M_image
+                    DIM_KER => M_kernel,
+                    DIM_IMG => N_image
                 )
                 port map (
                     clk => clk_ext,
                     reset => reset_ext,
                     i_f => i_f_ext,
                     x_valid => x_valid_ext,
-                    y_valid => y_valid_ext
+                    y_valid => y_valid_ext,
                     stall => stall_ext 
                 );
 
@@ -59,11 +63,13 @@ entity pipeline_tb  is
         variable t : integer := 0;  -- variable used to count the clock cycle after the reset
         begin
             if(reset_ext = '0') then
-                image_ext <= (others => '0');
                 t := 0;
             elsif(rising_edge(clk_ext)) then
                 case(t) is
                     
+                    when 30 =>
+                        i_f_ext <= '0';
+                        x_valid_ext <= '1';
 
                     when 50 => end_sim <= '0';  -- This command stops the simulation when t = 10
                     when others => null;        -- Specifying that nothing happens in the other cases
