@@ -38,6 +38,22 @@ end entity;
 architecture conv of convolution is
 
     signal data_out_pipeline : VECTOR(DIM_KER*DIM_KER-1 downto 0);
+    signal stall_sig : std_logic;
+
+    component state_machine is 
+    generic (
+        DIM_KER : positive;
+        DIM_IMG : positive    
+    );
+    port (
+        clk : in std_logic;
+        reset : in std_logic;
+        i_f . in std_logic;
+        x_valid : in std_logic;
+        y_valid : out std_logic;
+        stall : out std_logic;
+    );
+    end component;
 
     component pipeline is 
     generic (
@@ -65,6 +81,22 @@ architecture conv of convolution is
 
     begin
 
+    --------------------------------------------------------------------
+    -- State Machine istantiation
+    --------------------------------------------------------------------
+    fsm0: state_machine 
+    generic map (
+        DIM_KER => DIM_KER,
+        DIM_IMG => DIM_IMG
+    )
+    port map (
+        clk => clk,
+        reset => reset,
+        i_f => if_signal,
+        x_valid => x_valid,
+        y_valid => y_valid,
+        stall => stall_sig
+    );
     --------------------------------------------------------------------
     -- Pipeline unit istantiation
     --------------------------------------------------------------------

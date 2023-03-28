@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use ieee.numeric_std_unsigned.all;
 
 -----------------------------------------------------------------
 -- Entity Declaration
@@ -8,7 +9,7 @@ use ieee.numeric_std.all;
 
 entity control_logic is 
         generic (
-        DIM_KER : positive := 3,
+        DIM_KER : positive := 3;
         DIM_IMG : positive := 4
         ); 
         port (
@@ -19,8 +20,7 @@ entity control_logic is
         x_valid : in std_logic;
         -- output 
         y_valid : out std_logic;
-        stall : out std_logic;
-        flush : out std_logic; 
+        stall : out std_logic
   );
 end control_logic;
 
@@ -31,7 +31,11 @@ type t_control_logic_fsm is (
                           ST_S2      ,
                           ST_S3      );
 
-signal counter_kernel : std_logic_vector(log2(DIM_KER*DIM_KER))
+signal counter_kernel : std_logic_vector(7 downto 0);
+signal counter_img : std_logic_vector(7 downto 0);
+signal counter_out : std_logic_vector(7 downto 0);
+
+
 signal r_st_present    : t_control_logic_fsm;
 signal w_st_next       : t_control_logic_fsm;
 begin
@@ -40,11 +44,11 @@ begin
 -- Next state logic
 ----------------------------------------------------------------- 
 
-p_state : process(i_clk,i_rstb)
+p_state : process(clk,reset)
 begin
-  if(i_rstb='0') then
+  if(reset='0') then
     r_st_present            <= ST_S0;
-  elsif(rising_edge(i_clk)) then
+  elsif(rising_edge(clk)) then
     r_st_present            <= w_st_next;
   end if;
 end process p_state;
@@ -67,7 +71,7 @@ begin
     
     -- S1
     when ST_S1 => 
-      if (counter_kernel = DIM_KER*DIM_KER) then  
+      if counter_kernel = std_logic_vector(to_unsigned(DIM_KER*DIM_KER,8)) then  
         w_st_next  <= ST_S2;
       else                                                         
         w_st_next  <= ST_S1;
@@ -75,7 +79,7 @@ begin
     
     -- S2
     when ST_S2 =>  
-        if (counter_img = (DIM_KER-1)*(DIM_IMG) + DIM_KER) then
+        if counter_img = std_logic_vector(to_unsigned((DIM_KER-1)*DIM_IMG + DIM_KER,8)) then
             w_st_next <= ST_S3;
         else
             w_st_next <= ST_S2;
@@ -83,7 +87,7 @@ begin
     
     -- S3
     when ST_S3 =>  
-        if (counter_out = DIM_OUT) then
+        if counter_out = std_logic_vector(to_unsigned(4,8)) then
             w_st_next <= ST_S0;
         else
             w_st_next <= ST_S3;
@@ -96,17 +100,15 @@ end process p_comb;
 
 p_state_out : process(clk,reset)
 begin
-  if(i_rstb='0') then
+  if(reset='0') then
     y_valid     <= '0';
     stall       <= '1';
-    flush       <= '1';
-  elsif(rising_edge(i_clk)) then
+  elsif(rising_edge(clk)) then
     case r_st_present is
     
     when ST_S0 =>
         stall     <= '1';
         y_valid   <= '0';
-        flush     <= '0';
         counter_kernel <= std_logic_vector(to_unsigned(0,8));
         counter_img <= std_logic_vector(to_unsigned(0,8));
         counter_out <= std_logic_vector(to_unsigned(0,8));
