@@ -40,6 +40,8 @@ architecture conv of convolution is
     signal data_out_pipeline : VECTOR(DIM_KER*DIM_KER-1 downto 0);
     signal stall_sig : std_logic;
 
+
+
     component state_machine is 
     generic (
         DIM_KER : positive;
@@ -82,14 +84,13 @@ architecture conv of convolution is
 
     begin
 
-
-
     --------------------------------------------------------------------
     -- Kernel buffer istantiation
     --------------------------------------------------------------------
     kernelbuf: fifo 
     generic map(
-        DIM_
+        DIM_KER : positive;
+        dim
     )
     port map (
 

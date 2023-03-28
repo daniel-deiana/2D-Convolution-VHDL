@@ -60,7 +60,6 @@ end process p_state;
 p_comb : process(clk, r_st_present, i_f , x_valid)
 begin
   case r_st_present is
-    
     -- S0
     when ST_S0 => 
       if (i_f = '0') and (x_valid = '1') then  
@@ -68,7 +67,6 @@ begin
       else                                                         
         w_st_next  <= ST_S0;
       end if;
-    
     -- S1
     when ST_S1 => 
       if counter_kernel > std_logic_vector(to_unsigned(DIM_KER*DIM_KER-1,8)) then  
@@ -76,15 +74,13 @@ begin
       else                                                         
         w_st_next  <= ST_S1;
       end if;
-    
     -- S2
     when ST_S2 =>  
         if counter_img = std_logic_vector(to_unsigned((DIM_KER-1)*DIM_IMG + DIM_KER-1 ,8)) then
             w_st_next <= ST_S3;
         else
             w_st_next <= ST_S2;
-        end if;
-    
+        end if;    
     -- S3
     when ST_S3 =>  
         if counter_out = std_logic_vector(to_unsigned((DIM_IMG-DIM_KER+1)*(DIM_IMG-DIM_KER+1),8)) then
@@ -92,7 +88,6 @@ begin
         else
             w_st_next <= ST_S3;
         end if;  
-    
   end case;
 end process p_comb;
 
@@ -101,6 +96,7 @@ begin
   if(reset='0') then
     y_valid     <= '0';
     stall       <= '1';
+  
   elsif(rising_edge(clk)) then
     case r_st_present is
     
