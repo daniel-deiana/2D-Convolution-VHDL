@@ -48,10 +48,10 @@ architecture conv of convolution is
     port (
         clk : in std_logic;
         reset : in std_logic;
-        i_f . in std_logic;
+        i_f : in std_logic;
         x_valid : in std_logic;
         y_valid : out std_logic;
-        stall : out std_logic;
+        stall : out std_logic
     );
     end component;
 

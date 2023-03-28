@@ -7,7 +7,7 @@ use ieee.numeric_std_unsigned.all;
 -- Entity Declaration
 ----------------------------------------------------------------- 
 
-entity control_logic is 
+entity state_machine is 
         generic (
         DIM_KER : positive := 3;
         DIM_IMG : positive := 4
@@ -22,7 +22,7 @@ entity control_logic is
         y_valid : out std_logic;
         stall : out std_logic
   );
-end control_logic;
+end state_machine;
 
 architecture rtl of control_logic is
 type t_control_logic_fsm is (
