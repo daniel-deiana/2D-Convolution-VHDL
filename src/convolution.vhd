@@ -25,8 +25,7 @@ entity convolution is
         if_signal : in std_logic;
         x_valid : in std_logic;
         y_valid : out std_logic;
-        y : out std_Logic_vector(N_BIT - 1 downto 0);
-        data_out_kernel : in VECTOR(DIM_KER*DIM_KER -1 downto 0)
+        y : out std_Logic_vector(N_BIT - 1 downto 0)
     );
 end entity;
 
@@ -36,10 +35,11 @@ end entity;
 
 architecture conv of convolution is
 
-    signal data_out_pipeline : VECTOR(DIM_KER*DIM_KER-1 downto 0);
+
+    signal ker_out : VECTOR(DIM_KER*DIM_KER-1 downto 0);
+    signal out_pipeline : VECTOR(DIM_KER*DIM_KER-1 downto 0);
     signal stall_p_sig : std_logic;
     signal stall_k_sig : std_logic;
-
 
 
     component state_machine is 
@@ -72,6 +72,20 @@ architecture conv of convolution is
     );
     end component;
 
+    component fifo_m is 
+    generic (
+        DEPTH      : natural := 4;
+        DATA_WIDTH : natural := 8
+    );
+    port(
+        clk      : in std_logic;
+        a_rst_n  : in std_logic;
+        enable   : in std_logic; 
+        data_in  : in std_logic_vector(DATA_WIDTH - 1 downto 0);
+        dout : out VECTOR(DEPTH-1 downto 0)
+    );
+    end component;
+
     component alu is
     generic (
         K : positive
@@ -84,11 +98,6 @@ architecture conv of convolution is
     end component;
 
     begin
-
-    --------------------------------------------------------------------
-    -- Kernel buffer istantiation
-    --------------------------------------------------------------------
-    
 
     --------------------------------------------------------------------
     -- State Machine istantiation
@@ -107,6 +116,7 @@ architecture conv of convolution is
         stall_p => stall_p_sig,
         stall_k => stall_k_sig
     );
+
     --------------------------------------------------------------------
     -- Pipeline unit istantiation
     --------------------------------------------------------------------
@@ -120,8 +130,25 @@ architecture conv of convolution is
         reset => reset,
         stall => stall_p_sig,
         in_image => x,
-        out_conv => data_out_pipeline
+        out_conv => out_pipeline
     );
+
+    --------------------------------------------------------------------
+    -- Kernel buffer istantiation
+    --------------------------------------------------------------------
+        
+    kernel_buffer: fifo_m generic map(
+        DEPTH => DIM_KER * DIM_KER,
+        DATA_WIDTH => 8
+    )
+    port map(
+        clk => clk,
+        a_rst_n => reset,
+        enable => stall_k_sig,
+        data_in => x,
+        dout => ker_out
+    );
+
     --------------------------------------------------------------------
     -- Alu unit istantiation
     --------------------------------------------------------------------
@@ -130,8 +157,8 @@ architecture conv of convolution is
         K => DIM_KER
     )  
     port map(
-        INPUT0 => data_out_pipeline,
-        INPUT1 => data_out_kernel,  
+        INPUT0 => out_pipeline,
+        INPUT1 => ker_out,  
         OUTPUT => y
     );
 

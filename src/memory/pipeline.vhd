@@ -7,7 +7,6 @@ library work;
     use work.utilities.all;
     use work.common_pkg.all;
 
-
 --------------------------------------------------------------------
 -- Interface Declaration
 --------------------------------------------------------------------
@@ -139,9 +138,6 @@ architecture arch of pipeline is
     elsif(DIM_KER=3) then
     end if;
     end process; 
-
-    
-
 
     end generate;
 end architecture;

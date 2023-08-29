@@ -63,14 +63,14 @@ begin
   case r_st_present is
     -- S0
     when ST_S0 => 
-      if (i_f = '0') and (x_valid = '1') then  
+      if (i_f = '1') and (x_valid = '1') then  
         w_st_next  <= ST_S1;
         else                                                         
         w_st_next  <= ST_S0;
       end if;
     -- S1
     when ST_S1 => 
-      if counter_kernel > std_logic_vector(to_unsigned(DIM_KER*DIM_KER-1,8)) then  
+      if (counter_kernel > std_logic_vector(to_unsigned(DIM_KER*DIM_KER-1,8))) and (i_f = '0') then  
         w_st_next  <= ST_S2;
       elsif reset = '0' then                                                      
         w_st_next  <= ST_S0;
@@ -79,7 +79,7 @@ begin
       end if;
     -- S2
     when ST_S2 =>  
-        if counter_img = std_logic_vector(to_unsigned((DIM_KER-1)*DIM_IMG + DIM_KER-1 ,8)) then
+        if counter_img > std_logic_vector(to_unsigned((DIM_KER-1)*DIM_IMG + DIM_KER-1 ,8)) then
             w_st_next <= ST_S3;
         elsif reset = '0' then                                                      
             w_st_next  <= ST_S0;
@@ -98,20 +98,24 @@ begin
   end case;
 end process p_comb;
 
-p_state_out : process(clk,reset)
+
+
+
+
+p_state_out : process(clk,reset,x_valid,i_f)
 begin
   if(reset='0') then
-    y_valid     <= '0';
-    stall_p       <= '1';
-    stall_k       <= '1';
+    y_valid   <= '0';
+    stall_p   <= '0';
+    stall_k   <= '0';
   
   
   elsif(rising_edge(clk)) then
     case r_st_present is
-    
+
     when ST_S0 =>
-        stall_p     <= '1';
-        stall_k   <= '1'; 
+        stall_p   <= '0';
+        stall_k   <= '0'; 
         y_valid   <= '0';
         counter_kernel <= std_logic_vector(to_unsigned(0,8));
         counter_img <= std_logic_vector(to_unsigned(0,8));
@@ -119,16 +123,18 @@ begin
     
     when ST_S1 =>
         counter_kernel <= counter_kernel + 1;
-        stall_k <= '0';
-    
+        -- non stallo solamente se l'input è valido 
+        stall_k <= x_valid;
+
     when ST_S2 => 
-        stall_k <= '1';
-        stall_p <= '0';
+        stall_k <= '0';
+        stall_p <= x_valid;
         y_valid <= '0';
         counter_img <= counter_img + 1;
 
     when ST_S3 => 
-        y_valid <= '1';
+        y_valid <= x_valid;
+        stall_p <= x_valid;
         counter_out <= counter_out + 1;
 
     end case;
