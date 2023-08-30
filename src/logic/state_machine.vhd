@@ -32,9 +32,9 @@ type t_control_logic_fsm is (
                           ST_S2      ,
                           ST_S3      );
 
-signal counter_kernel : std_logic_vector(7 downto 0);
-signal counter_img : std_logic_vector(7 downto 0);
-signal counter_out : std_logic_vector(7 downto 0);
+signal counter_kernel : integer;
+signal counter_img    : integer;
+signal counter_out    : integer;
 
 
 signal r_st_present    : t_control_logic_fsm;
@@ -70,7 +70,7 @@ begin
       end if;
     -- S1
     when ST_S1 => 
-      if (counter_kernel > std_logic_vector(to_unsigned(DIM_KER*DIM_KER-1,8))) and (i_f = '0') then  
+      if (counter_kernel > DIM_KER*DIM_KER-1) and (i_f = '0') then  
         w_st_next  <= ST_S2;
       elsif reset = '0' then                                                      
         w_st_next  <= ST_S0;
@@ -79,18 +79,18 @@ begin
       end if;
     -- S2
     when ST_S2 =>  
-        if counter_img > std_logic_vector(to_unsigned((DIM_KER-1)*DIM_IMG + DIM_KER-1 ,8)) then
+        if counter_img > (DIM_KER-1) * DIM_IMG + DIM_KER-1 then
             w_st_next <= ST_S3;
-        elsif reset = '0' then                                                      
+        elsif reset = '0' or i_f = '1' then                                                      
             w_st_next  <= ST_S0;
         else
             w_st_next <= ST_S2;
         end if;    
     -- S3
     when ST_S3 =>  
-        if counter_out = std_logic_vector(to_unsigned((DIM_IMG-DIM_KER+1)*(DIM_IMG-DIM_KER+1),8)) then
+        if counter_out = (DIM_IMG-DIM_KER+ 1)*(DIM_IMG-DIM_KER+1 + 1) then
             w_st_next <= ST_S0;
-        elsif reset = '0' then                                                      
+        elsif reset = '0' or i_f = '1' then                                                      
             w_st_next  <= ST_S0;
         else
             w_st_next <= ST_S3;
@@ -98,18 +98,13 @@ begin
   end case;
 end process p_comb;
 
-
-
-
-
 p_state_out : process(clk,reset,x_valid,i_f)
 begin
   if(reset='0') then
     y_valid   <= '0';
     stall_p   <= '0';
     stall_k   <= '0';
-  
-  
+
   elsif(rising_edge(clk)) then
     case r_st_present is
 
@@ -117,25 +112,42 @@ begin
         stall_p   <= '0';
         stall_k   <= '0'; 
         y_valid   <= '0';
-        counter_kernel <= std_logic_vector(to_unsigned(0,8));
-        counter_img <= std_logic_vector(to_unsigned(0,8));
-        counter_out <= std_logic_vector(to_unsigned(0,8));
+        counter_kernel <= 0;
+        counter_img <= 0;
+        counter_out <= 1;
     
     when ST_S1 =>
-        counter_kernel <= counter_kernel + 1;
+        -- we increment only if input is valid, else we stall  
+        if x_valid = '1' then
+          counter_kernel <= counter_kernel + 1;
+        end if;
         -- non stallo solamente se l'input è valido 
         stall_k <= x_valid;
 
     when ST_S2 => 
+        -- we stall the kernel buffer and we take the input on the pipeline side
         stall_k <= '0';
-        stall_p <= x_valid;
+        stall_p <= x_valid;  
         y_valid <= '0';
+        
+        -- we increment only if input is valid, else we stall  
+        if x_valid = '1' then 
         counter_img <= counter_img + 1;
+        end if;
 
     when ST_S3 => 
-        y_valid <= x_valid;
+        -- counter_out mod DIM_OUTPUT + 1 
+        if counter_out mod 4 = 0 then 
+          y_valid <= '0';
+        else
+          y_valid <= x_valid; 
+        end if; 
+        
         stall_p <= x_valid;
-        counter_out <= counter_out + 1;
+        
+        if x_valid = '1' then 
+          counter_out <= counter_out + 1;
+        end if;
 
     end case;
   end if;

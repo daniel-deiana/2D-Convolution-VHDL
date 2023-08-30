@@ -7,10 +7,10 @@ library work;
     use work.utilities.all;
     use work.common_pkg.all;
 
-entity convolution_tb  is
+entity test2  is
     end entity;
     
-    architecture beh of convolution_tb is 
+    architecture beh of test2 is 
     
         constant T_RESET : time := 25 ns;
         constant clk_period : time := 10 ns;
@@ -83,27 +83,33 @@ entity convolution_tb  is
                     when 25 => input_ext   <= std_logic_vector(to_unsigned(1,8));
                     when 26 => input_ext   <= std_logic_vector(to_unsigned(1,8));
                     
-                    when 27 => if_ext <= '0'; 
+                    when 27=> if_ext <= '0'; 
 
                     -- load image elements
+
                     when 30 => input_ext   <= std_logic_vector(to_unsigned(1,8));
                     when 31 => input_ext   <= std_logic_vector(to_unsigned(2,8));
                     when 32 => input_ext   <= std_logic_vector(to_unsigned(3,8));
                     when 33 => input_ext   <= std_logic_vector(to_unsigned(4,8));
                     when 34 => input_ext   <= std_logic_vector(to_unsigned(5,8));
                     when 35 => input_ext   <= std_logic_vector(to_unsigned(6,8));
-                    when 36 => input_ext   <= std_logic_vector(to_unsigned(7,8));
-                    when 37 => input_ext   <= std_logic_vector(to_unsigned(8,8));
-                    when 38 => input_ext   <= std_logic_vector(to_unsigned(9,8));
-                    when 39 => input_ext   <= std_logic_vector(to_unsigned(10,8));
-                    when 40 => input_ext   <= std_logic_vector(to_unsigned(11,8));
-                    when 41 => input_ext   <= std_logic_vector(to_unsigned(12,8));
-                    when 42 => input_ext   <= std_logic_vector(to_unsigned(13,8));
-                    when 43 => input_ext   <= std_logic_vector(to_unsigned(14,8));
-                    when 44 => input_ext   <= std_logic_vector(to_unsigned(15,8));
-                    when 45 => input_ext   <= std_logic_vector(to_unsigned(16,8));
+                    
+                    x_valid_ext <= '0';
 
-                    when 50 => end_sim <= '0';  -- This command stops the simulation when t = 10
+                    when 47 => x_valid_ext <= '1';
+
+                    when 48 => input_ext   <= std_logic_vector(to_unsigned(7,8));
+                    when 49 => input_ext   <= std_logic_vector(to_unsigned(8,8));
+                    when 50 => input_ext   <= std_logic_vector(to_unsigned(9,8));
+                    when 51 => input_ext   <= std_logic_vector(to_unsigned(10,8));
+                    when 52 => input_ext   <= std_logic_vector(to_unsigned(11,8));
+                    when 53 => input_ext   <= std_logic_vector(to_unsigned(12,8));
+                    when 54 => input_ext   <= std_logic_vector(to_unsigned(13,8));
+                    when 55 => input_ext   <= std_logic_vector(to_unsigned(14,8));
+                    when 56 => input_ext   <= std_logic_vector(to_unsigned(15,8));
+                    when 57 => input_ext   <= std_logic_vector(to_unsigned(16,8));
+
+                    when 59 => end_sim <= '0';  -- This command stops the simulation when t = 10
                     when others => null;        -- Specifying that nothing happens in the other cases
                 end case;
             t := t + 1;  
